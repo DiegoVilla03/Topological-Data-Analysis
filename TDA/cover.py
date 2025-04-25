@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 
 class CoverGenerator:
     def __init__(self, n_intervals=10, overlap=0.1):
@@ -8,21 +9,30 @@ class CoverGenerator:
         self.overlap = overlap
 
     def compute_cover(self, lens_values):
-        """
-        Retorna lista de (start, end, indices) basada en lens_values.
-        """
-        min_l, max_l = lens_values.min(), lens_values.max()
-        length = max_l - min_l
-        if length == 0:
-            raise ValueError("Valores de lente idénticos; no se puede generar cubierta.")
+        lens_values = np.asarray(lens_values)
+        if lens_values.ndim == 1:
+            lens_values = lens_values.reshape(-1, 1)
 
-        size = length / (self.n_intervals - (self.n_intervals - 1) * self.overlap)
-        step = size * (1 - self.overlap)
+        n_samples, n_dims = lens_values.shape
+        min_vals = lens_values.min(axis=0)
+        max_vals = lens_values.max(axis=0)
+        lengths = max_vals - min_vals
+
+        if np.any(lengths == 0):
+            raise ValueError("Al menos una dimensión tiene valores constantes; no se puede generar cubierta.")
+        
+        interval_sizes = lengths / (self.n_intervals - (self.n_intervals - 1) * self.overlap)
+        steps = interval_sizes * (1 - self.overlap)
+
+        starts_list = [np.linspace(min_vals[d], max_vals[d] - interval_sizes[d], self.n_intervals) for d in range(n_dims)]
         cover = []
-        start = min_l
-        for _ in range(self.n_intervals):
-            end = start + size
-            inds = np.where((lens_values >= start) & (lens_values <= end))[0]
-            cover.append((start, end, inds))
-            start += step
+
+        for starts in itertools.product(*starts_list):
+            bounds = [(s, s + interval_sizes[d]) for d, s in enumerate(starts)]
+            mask = np.ones(n_samples, dtype=bool)
+            for d in range(n_dims):
+                mask &= (lens_values[:, d] >= bounds[d][0]) & (lens_values[:, d] <= bounds[d][1])
+            inds = np.where(mask)[0]
+            cover.append((bounds, inds))
+
         return cover
