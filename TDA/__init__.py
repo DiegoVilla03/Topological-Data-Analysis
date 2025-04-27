@@ -36,7 +36,24 @@ class Mapper:
         clusters_idx = {nid: set(vals) for nid, vals in raw_idx.items()}
         self.nerve = self.nerve_builder.compute_nerve(clusters_idx, max_order=self.nerve_order)
         return self
+    
+    def plot_graph(self, color_data=None, layout='spring', **kwargs):
+        """Dibuja el grafo Mapper coloreando nodos según color_data."""
+        self.plotter.plot_graph(self.graph, color_data=color_data, layout=layout, **kwargs)
 
+    def plot_hist(self, bins=30):
+        """Dibuja el histograma de los valores de lente."""
+        self.plotter.plot_hist(self.lens_values, bins=bins)
+
+    def plot_data(self, **kwargs):
+        """Dibuja los clusters en el espacio de datos."""
+        self.plotter.plot_data(self.data, self.clusters_map, **kwargs)
+
+    def plot_homology(self):
+        """Dibuja los diagramas de homología persistente."""
+        self.homology.plot()
+
+    # acceso a resultados
     def analyze_homology(self, X=None):
         if X is None:
             X = self.data
@@ -44,16 +61,6 @@ class Mapper:
         self.betti = self.homology.get_betti()
         return self.diagrams
 
-    def plot(self, plot_graph=True, plot_hist=True, plot_data=False,
-             plot_homology=False, **kwargs):
-        if plot_graph and self.graph is not None:
-            self.plotter.plot_graph(self.graph, **kwargs)
-        if plot_hist and self.lens_values is not None:
-            self.plotter.plot_lens_hist(self.lens_values)
-        if plot_data and self.data is not None and self.clusters_map is not None:
-            self.plotter.plot_data_clusters(self.data, self.clusters_map, **kwargs)
-        if plot_homology:
-            self.homology.plot()
 
     def get_cover(self): return self.cover
     def get_graph(self): return self.graph

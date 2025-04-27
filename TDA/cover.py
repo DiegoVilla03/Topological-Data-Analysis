@@ -20,7 +20,7 @@ class CoverGenerator:
 
         if np.any(lengths == 0):
             raise ValueError("Al menos una dimensión tiene valores constantes; no se puede generar cubierta.")
-        
+
         interval_sizes = lengths / (self.n_intervals - (self.n_intervals - 1) * self.overlap)
         steps = interval_sizes * (1 - self.overlap)
 
@@ -36,3 +36,4 @@ class CoverGenerator:
             cover.append((bounds, inds))
 
         return cover
+
