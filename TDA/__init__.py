@@ -4,7 +4,9 @@ from .cover import CoverGenerator
 from .mapper_base import MapperBase
 from .plot import MapperPlot
 from .nerve import NerveBuilder
-from .homology import HomologyAnalyzer
+from .homology import *
+from .geometry import *
+from .utils import TimeEmbedding
 
 class Mapper:
     def __init__(self, lens_func=None, n_intervals=10, overlap=0.1,
@@ -53,17 +55,11 @@ class Mapper:
         """Dibuja los diagramas de homología persistente."""
         self.homology.plot()
 
-    # acceso a resultados
-    def analyze_homology(self, X=None):
-        if X is None:
-            X = self.data
-        self.diagrams = self.homology.compute(X)
-        self.betti = self.homology.get_betti()
-        return self.diagrams
-
 
     def get_cover(self): return self.cover
     def get_graph(self): return self.graph
     def get_nerve(self): return self.nerve
     def get_diagrams(self): return self.diagrams
     def get_betti(self): return self.betti
+
+
